@@ -125,6 +125,11 @@ class CreatePurchaseOrderRequest(BaseModel):
 def root():
     return {"message": "Factory Inventory Management System API", "version": "1.0.0"}
 
+@app.get("/health")
+def health_check():
+    """Health check endpoint for monitoring and load balancer checks."""
+    return {"status": "ok"}
+
 @app.get("/api/inventory", response_model=List[InventoryItem])
 def get_inventory(
     warehouse: Optional[str] = None,

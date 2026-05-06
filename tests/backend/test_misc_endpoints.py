@@ -241,3 +241,28 @@ class TestRootEndpoint:
         assert "version" in data
         assert isinstance(data["message"], str)
         assert isinstance(data["version"], str)
+
+
+class TestHealthEndpoint:
+    """Test suite for the health check endpoint."""
+
+    def test_health_check_status_code(self, client):
+        """Test that the health endpoint returns HTTP 200."""
+        response = client.get("/health")
+        assert response.status_code == 200
+
+    def test_health_check_response_body(self, client):
+        """Test that the health endpoint returns the expected body."""
+        response = client.get("/health")
+        data = response.json()
+
+        assert isinstance(data, dict)
+        assert "status" in data
+        assert data["status"] == "ok"
+
+    def test_health_check_response_is_exact(self, client):
+        """Test that the health endpoint returns exactly {\"status\": \"ok\"}."""
+        response = client.get("/health")
+        data = response.json()
+
+        assert data == {"status": "ok"}
