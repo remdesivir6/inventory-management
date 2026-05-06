@@ -1,0 +1,37 @@
+name: Coding Agent
+
+on:
+  issues:
+    types: [assigned]
+
+jobs:
+  run-agent:
+    # Only run when the issue is assigned to the configured bot user
+    if: github.event.assignee.login == vars.AGENT_USERNAME
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r agent/requirements.txt
+
+      - name: Run coding agent
+        run: python agent/agent.py
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          REPO_FULL_NAME: ${{ github.repository }}
