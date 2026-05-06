@@ -19,7 +19,7 @@ import anthropic
 
 from tools import TOOLS, execute_tool
 
-MODEL = "claude-sonnet-4-20250514"
+MODEL = "claude-sonnet-4-6-20250514"
 MAX_TOKENS = 8192
 MAX_ITERATIONS = 50
 
