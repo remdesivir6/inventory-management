@@ -141,6 +141,8 @@ def create_branch_and_pr(repo: str, issue_number: str, issue_title: str) -> None
     git("config", "user.name", "coding-agent[bot]")
     git("config", "user.email", "coding-agent[bot]@users.noreply.github.com")
 
+    # Delete remote branch if it exists from a previous run
+    git("push", "origin", "--delete", branch)
     git("checkout", "-b", branch)
 
     # Stage all changes (new, modified, deleted files)
