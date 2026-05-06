@@ -168,18 +168,28 @@ def create_branch_and_pr(repo: str, issue_number: str, issue_title: str) -> None
         f"---\n"
         f"*Please review the changes carefully before merging.*"
     )
-    pr_result = gh(
-        "pr", "create",
-        "--repo", repo,
-        "--base", "main",
-        "--head", branch,
-        "--title", f"fix: {issue_title}",
-        "--body", pr_body,
-    )
-    if pr_result.returncode != 0:
-        raise RuntimeError(f"Failed to create PR: {pr_result.stderr}")
+    # Retry PR creation up to 3 times to handle transient GitHub API errors (e.g. 504)
+    import time
+    pr_url = None
+    for attempt in range(1, 4):
+        pr_result = gh(
+            "pr", "create",
+            "--repo", repo,
+            "--base", "main",
+            "--head", branch,
+            "--title", f"fix: {issue_title}",
+            "--body", pr_body,
+        )
+        if pr_result.returncode == 0:
+            pr_url = pr_result.stdout.strip()
+            break
+        print(f"PR creation attempt {attempt}/3 failed: {pr_result.stderr.strip()}")
+        if attempt < 3:
+            time.sleep(5 * attempt)
 
-    pr_url = pr_result.stdout.strip()
+    if not pr_url:
+        raise RuntimeError(f"Failed to create PR after 3 attempts: {pr_result.stderr}")
+
     print(f"\nPR created: {pr_url}")
     post_comment(repo, issue_number, f"The agent has opened a pull request: {pr_url}")
 
